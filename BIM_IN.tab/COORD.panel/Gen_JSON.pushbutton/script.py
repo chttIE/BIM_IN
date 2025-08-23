@@ -13,7 +13,7 @@ from pyrevit import script, forms, coreutils
 from sup import get_size_file
 output = script.get_output()
 script.get_output().close_others(all_open_outputs=True)
-output.set_width(900)
+output.set_width(900) 
 
 #Путь до файла txt где записаны адреса до объектов
 
