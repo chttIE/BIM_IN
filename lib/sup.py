@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 import ctypes
-from Autodesk.Revit.DB import BuiltInCategory, Category, Element, ExternalResourceType, Family, MEPSystemType,\
+from Autodesk.Revit.DB import  Category, Element, ExternalResourceType, Family, MEPSystemType,\
       FilteredElementCollector as FEC, RevitLinkInstance, WorksharingUtils
 from pyrevit import forms, script
 import os
@@ -10,7 +10,7 @@ import io
 from pyrevit.coreutils import Guid
 from pyrevit.framework import Diagnostics
 
-json_folder = r'Z:\BIM\7. Дополения\1. Внутренние\3. Данные\Плагины\pyRevit\Json'
+
 DEFAULT_INPUTWINDOW_WIDTH = 500
 
 from Autodesk.Revit.DB import WorksharingUtils
@@ -154,48 +154,6 @@ def lst_len(lst):
     """
     return sum(1 for _ in lst)
 
-def select_file_local():
-    #Функция не используется. 
-    folder_path = r"S:\Н\Нистратов Илья\Скрипты\Добавление связей"
-    
-    def list_files_in_folder(folder_path):
-        lst_model = []
-        try:
-            for file in os.listdir(folder_path):
-                lst_model.append(file.split(".txt")[0])
-        except OSError as e:
-            print("Ошибка чтения папки {}: {}".format(folder_path, e))
-        return lst_model
-
-    sel = list_files_in_folder(folder_path)
-
-    if sel:
-        selected_file = forms.SelectFromList.show(sel,
-                                                title="Выбор объекта",
-                                                width=400,
-                                                button_name='Выбрать')
-    if selected_file:
-        file_path = os.path.join(folder_path, selected_file)
-        
-        # Чтение содержимого файла и запись в список lst_model_project
-        lst_model_project = []
-        try:
-            with open(file_path+ ".txt", 'r') as file:
-                for line in file:
-                    lst_model_project.append(line.decode('utf-8').strip())
-        except OSError as e:
-            print("Ошибка при чтении файла {}: {}".format(file_path, e))
-
-        with forms.WarningBar(title="Выбор моделей"):
-            items = forms.SelectFromList.show(lst_model_project,
-                                                title='Выбор моделей',
-                                                multiselect=True,
-                                                button_name='Выбрать',
-                                                width=800,
-                                                height=800
-                                                )
-        if items: return items
-        else: script.exit()
 
 
 def get_lookup_param_el(el,name):
@@ -203,23 +161,7 @@ def get_lookup_param_el(el,name):
     except: return False
 
 
-def objlist():
-    """
-    Читает путь и возвращает список полных путей до json файлов, которые находит в папке.
-    Функция вспомогательная для нового интерфейса.
-    """
-    
-    folder_path = json_folder
-    lst_model = []
-    try:
-        for file in os.listdir(folder_path):
-            full_path = os.path.join(folder_path, file)
-            if file.endswith(".json"):
-                lst_model.append(full_path)
-    except OSError as e:
-        print("Ошибка чтения папки {}: {}".format(folder_path, e))
-        return None
-    return lst_model
+
 
 
 def read_json_obj(path):
@@ -236,62 +178,6 @@ def read_json_obj(path):
     return addresses
 
 
-def select_file():
-    import json
-    """
-    Основная функция для получения списка адресов моделей
-    При запуске читает содержимое папки по адресу содержащемуся в переменной json_path
-    Находя json файлы предлагает выбрать один из них.
-    После выбора читает содержимое файла в поиске адресов к моделям 
-    Собирает их в список и дает возможность выбрать адреса
-    Итогом работы является список выбранных адресов моделей
-    """
-    
-    folder_path = json_folder
-    
-    def list_files_in_folder(folder_path):
-        lst_model = []
-        try:
-            for file in os.listdir(folder_path):
-                lst_model.append(file.split(".json")[0])
-        except OSError as e:
-            print("Ошибка чтения папки {}: {}".format(folder_path, e))
-        return lst_model
-
-    sel = list_files_in_folder(folder_path)
-
-    if sel:
-        selected_file = forms.SelectFromList.show(sel,
-                                                title="Выбор объекта",
-                                                width=400,
-                                                height=900,
-                                                button_name='Выбрать')
-    if selected_file:
-        file_path = os.path.join(folder_path, selected_file)
-    
-        # Открытие и чтение файла JSON
-        with io.open(file_path + ".json", 'r', encoding='utf-8') as file:
-            data = json.load(file)
-
-        # Извлечение всех значений поля "Address"
-        addresses = [entry['Address'] for entry in data]
-
-        # Вывод всех найденных значений переменной "Address"
-        lst_model_project = []
-        for address in addresses:
-            lst_model_project.append(address)
-        
-
-        with forms.WarningBar(title="Выбор моделей"):
-            items = forms.SelectFromList.show(sorted(lst_model_project),
-                                                title='Выбор моделей',
-                                                multiselect=True,
-                                                button_name='Выбрать',
-                                                width=800,
-                                                height=900
-                                                )
-        if items: return items
-        else: script.exit()
 
 
 
@@ -528,7 +414,7 @@ def sel_open_fam(title='Select Open Familys',
         ```
     """
     # find open documents other than the active doc
-    app = __revit__.Application
+    app = __revit__.Application # type: ignore
     docs =  app.Documents
     open_docs_fam = [d for d in docs if d.IsFamilyDocument]    #pylint: disable=E1101
     # if check_more_than_one:
@@ -586,7 +472,3 @@ def get_familysymbol(doc):
                     return f
         else: script.exit()
     else: script.exit()
-
-
-# def get_link_models(doc):
-    

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#pylint: disable=import-error,invalid-name,broad-except
+
 __title__ = 'Закрыть'
 __doc__ =   """
             Закрытие и синхронизация всех открытых моделей кроме текущей. 
@@ -10,9 +10,8 @@ __doc__ =   """
 import datetime
 from rpw import ui
 from pyrevit import script, forms, coreutils
-from logIN import lg
 from models import Synchronize_models
-doc = __revit__.ActiveUIDocument.Document
+doc = __revit__.ActiveUIDocument.Document # type: ignore
 output = script.get_output()
 script.get_output().close_others(all_open_outputs=True)
 
@@ -27,7 +26,7 @@ try:
         ui.forms.flexform.CheckBox('save', 'Сохранить', default=True),
         ui.forms.flexform.CheckBox('comm', 'Оставить комментарий', default=True),
         ui.forms.flexform.Label("Комментарий"),
-        ui.forms.flexform.TextBox("comment", Text="Synchronisation from pyIN Panel"),				
+        ui.forms.flexform.TextBox("comment", Text="Synchronisation BIM_IN"),				
         ui.forms.Separator(),
         ui.forms.Button('Выбрать')]
 	form = ui.forms.FlexForm("Настройка закрытия моделей", components)
@@ -45,7 +44,7 @@ except:
 
 
 #main
-lg(doc,__title__)
+
 dest_docs = forms.select_open_docs(title='Выбор документов')
 if dest_docs:
     output.print_md("##ЗАКРЫТИЕ МОДЕЛЕЙ ({})".format(len(dest_docs)))

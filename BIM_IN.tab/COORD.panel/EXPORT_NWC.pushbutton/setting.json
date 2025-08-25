@@ -1,0 +1,17 @@
+{
+    'ConvertElementProperties': True,
+    'ExportRoomGeometry': True,
+    'ExportRoomAsAttribute': True,
+    'ExportUrls': True,
+    'ExportLinks': False,
+    'ConvertLinkedCADFormats': True,
+    'ExportElementIds': True,
+    'ExportParts': False,
+    'FindMissingMaterials': True,
+    'ConvertLights': False,
+    'DivideFileIntoLevels': True,
+    'Coordinates': NavisworksCoordinates.Shared,
+    'ExportScope': NavisworksExportScope.View,
+    'FacetingFactor': 25,
+    'Parameters': NavisworksParameters.All,
+}

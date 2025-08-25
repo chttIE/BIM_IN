@@ -1,0 +1,11 @@
+title: COORD
+layout:
+  - ScanServer
+  - OpenModels
+  - ClosedModels
+  - EXPORT_NWC
+
+background:
+  #panel: '#EEEEEE'
+  title: '#BCE5E5'
+  slideout: '#EEEEEE'
