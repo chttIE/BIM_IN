@@ -4,7 +4,7 @@
     "type": "extension",
     "rocket_mode_compatible": "True",
     "name": "BIM_IN",
-    "description": "Set of custom tools.",
+    "description": "extension for easy BIMing",
     "author": "Ilia Nistratov",
     "author_profile": "",
     "url": "https://github.com/chttIE/BIM_IN.git",
