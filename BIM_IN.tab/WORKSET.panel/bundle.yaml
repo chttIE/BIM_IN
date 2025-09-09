@@ -1,0 +1,10 @@
+title: WORKSET
+layout:
+  - СhangeWSLink
+  - RenameWS
+  - WSforGridLevel
+
+background:
+  #panel: '#EEEEEE'
+  title: '#BCE5E5'
+  slideout: '#EEEEEE'

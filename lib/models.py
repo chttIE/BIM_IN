@@ -2,7 +2,7 @@
 import codecs
 import os
 import re
-from Autodesk.Revit.DB import    BuiltInParameter,  ImportPlacement, ModelPathUtils, OpenOptions, RevitLinkOptions,\
+from Autodesk.Revit.DB import   BuiltInParameter,  ImportPlacement, ModelPathUtils, OpenOptions, RevitLinkOptions,\
                                 RevitLinkType, Transaction, Workset, WorksetConfiguration, WorksetConfigurationOption, \
                                 RelinquishOptions, ReloadLatestOptions, \
                                 SaveOptions, SynchronizeWithCentralOptions, \
@@ -10,7 +10,9 @@ from Autodesk.Revit.DB import    BuiltInParameter,  ImportPlacement, ModelPathUt
                                 DetachFromCentralOption, WorksetKind,RevitLinkInstance,\
                                 FilteredWorksetCollector as FWC,\
                                 FilteredElementCollector as FEC,\
-                                WorksetDefaultVisibilitySettings as WDVS, WorksharingUtils
+                                WorksetDefaultVisibilitySettings as WDVS, WorksharingUtils,\
+                                TransmissionData, ExternalFileReferenceType
+
 
 from pyrevit import forms, script,coreutils
 import datetime
@@ -23,6 +25,40 @@ app = __revit__.Application
 uidoc = __revit__.ActiveUIDocument
 doc = __revit__.ActiveUIDocument.Document
 user = app.Username
+
+# --- 1) Утилита: выгрузить RVT-связи ДО открытия файла ---
+def _unload_rvt_links_before_open(model_path, mark_transmitted=False, logfn=None):
+    """
+    Делает все RVT-связи файла незагружаемыми (Load=False) в TransmissionData.
+    Работает только для локальных/сетевых файлов и когда файл закрыт.
+    """
+    tdata = TransmissionData.ReadTransmissionData(model_path)
+    if tdata is None:
+        if logfn: logfn(u"- ℹ️ Нет TransmissionData (нет внешних ссылок или облачный путь).")
+        return 0
+
+    changed = 0
+    for xref_id in tdata.GetAllExternalFileReferenceIds():
+        xref = tdata.GetLastSavedReferenceData(xref_id)
+        if not xref:
+            continue
+        if xref.ExternalFileReferenceType == ExternalFileReferenceType.RevitLink:
+            mp = xref.GetPath()
+            ptype = xref.PathType
+            # выключаем загрузку RVT-связи
+            tdata.SetDesiredReferenceData(xref_id, mp, ptype, False)
+            changed += 1
+            if logfn:
+                vis = ModelPathUtils.ConvertModelPathToUserVisiblePath(mp)
+                logfn(u"- 🔌 RVT-связь будет открыта как выгруженная: `{}`".format(vis))
+
+    if changed:
+        if mark_transmitted:
+            tdata.IsTransmitted = True
+        TransmissionData.WriteTransmissionData(model_path, tdata)
+    return changed
+
+
 
 def get_ws_for_open(mp, name_ws):
     ws_for_open = []
@@ -51,7 +87,9 @@ def open_model( path,
                 audit = True,
                 detach = 1,
                 closeallws = True,
-                log=2):
+                log=2,
+                unload='rvt',
+                mark_transmitted=None):
 
     """
     Функция открытия модели
@@ -95,7 +133,6 @@ def open_model( path,
     # Задаем настройки открытия моделей
     
     if closeallws == True:
-
         workset_config = WorksetConfiguration(WorksetConfigurationOption.CloseAllWorksets)
         if log > 0: output.print_md("- :information: Рабочие наборы будут **закрыты**")
     elif closeallws == False: 
@@ -113,26 +150,37 @@ def open_model( path,
     else: workset_config = WorksetConfiguration(WorksetConfigurationOption.CloseAllWorksets)
     
     options = OpenOptions()
-    if detach == 0:   
-        options.DetachFromCentralOption = DetachFromCentralOption.DoNotDetach # не отсоединять модель
-        if log > 0: output.print_md("- :information: Модель будет открыта **без отсоединения**")
-    elif detach == 1: 
-        options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets # отсоединять модель и сохранить рн
-        if log > 0: output.print_md("- :information: Модель будет открыта **с отсоединением от ФХ и сохранением рабочих наборов**")
-    elif detach == 2: 
-        options.DetachFromCentralOption = DetachFromCentralOption.DetachAndDiscardWorksets # отсоединять модель и не сохранить рн
-        if log > 0: output.print_md("- :information: Модель будет открыта **с отсоединением от ФХ без сохранения рабочих наборов**")
+    if detach == 0:
+        options.DetachFromCentralOption = DetachFromCentralOption.DoNotDetach
+        if log > 0: output.print_md("- Открытие **без отсоединения**")
+    elif detach == 1:
+        options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets
+        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН)")
+    elif detach == 2:
+        options.DetachFromCentralOption = DetachFromCentralOption.DetachAndDiscardWorksets
+        if log > 0: output.print_md("- Открытие **с отсоединением** (не сохранять РН)")
     elif detach == 3:
-        options.DetachFromCentralOption = DetachFromCentralOption.ClearTransmittedSaveAsNewCentral # После открытия немедленно сохраните ее с текущим именем и снимите флаг передачи.
-        if log > 0: output.print_md("- :information: Модель будет открыта **в режиме передачи модели**")
-
+        # Специальный режим: сохранить РН + выгрузить RVT-связи в TransmissionData
+        options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets
+        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) + **выгрузить RVT-связи**")
+        try:
+            # помечаем как переданный: опционально, но уместно в этом сценарии
+            _unload_rvt_links_before_open(path, mark_transmitted=True,
+                                          logfn=(output.print_md if log > 1 else None))
+        except Exception as ex:
+            if log > 0:
+                output.print_md(u"- ⚠️ Не удалось выгрузить RVT-связи через TransmissionData: **{}**".format(ex))
+    else:
+        # на всякий
+        options.DetachFromCentralOption = DetachFromCentralOption.DoNotDetach
     options.Audit = audit  # активация проверки при открытие
     options.SetOpenWorksetsConfiguration(workset_config)
+    
     o_timer = coreutils.Timer() 
     try:
         if activate:
             #Обычный режим
-            uidoc = __revit__.OpenAndActivateDocument(path, options, False)
+            uidoc = __revit__.OpenAndActivateDocument(path, options, False) # pyright: ignore[reportUndefinedVariable]
             o_endtime = str(datetime.timedelta(seconds=o_timer.get_time())).split(".")[0]
             if log > 1: output.print_md("- :white_heavy_check_mark: Модель **{}** открыта. Время: **{}**".format(uidoc.Document.Title,o_endtime)) 
             return uidoc       
@@ -354,8 +402,6 @@ def create_ws_for_links(doc,log=1,pin_link=True):
                 match_obj = to_find.search(link.Name)
                 the_index = match_obj.start()
                 name = link.Name[:the_index]
-                name = str(name).replace("[*]","")
-                name = str(name).replace("[?]","")
                 new_name = pref + name
                 if new_name not in names_of_worksets:
                     try:

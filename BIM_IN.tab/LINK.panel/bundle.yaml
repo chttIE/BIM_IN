@@ -1,0 +1,8 @@
+title: LINKS
+layout:
+  - AddLinks
+
+background:
+  #panel: '#EEEEEE'
+  title: '#BCE5E5'
+  slideout: '#EEEEEE'
