@@ -162,6 +162,7 @@ def open_model( path,
     elif detach == 3:
         # Специальный режим: сохранить РН + выгрузить RVT-связи в TransmissionData
         options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets
+        DetachFromCentralOption.ClearTransmittedSaveAsNewCentral
         if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) + **выгрузить RVT-связи**")
         try:
             # помечаем как переданный: опционально, но уместно в этом сценарии

@@ -114,7 +114,7 @@ def form_nwc_options():
         "Координаты проекта (Project)"
     ]
     scope_items = [
-        "Текущий вид",
+        "Указанный вид",
         "Вся модель",
         "Выбранные элементы"
     ]
@@ -264,8 +264,8 @@ def export_NWC(d, view_id, folder_path, prefix="", suffix=""):
     # собрать опции из NWC_OPTIONS
     nweo = NavisworksExportOptions()
     nweo.ViewId = view_id
-    for k, v in NWC_OPTIONS.items():
-        setattr(nweo, k, v)
+    # for k, v in NWC_OPTIONS.items():
+    #     setattr(nweo, k, v)
 
     e_timer = coreutils.Timer() 
     d.Export(folder_path,name_model,nweo)
@@ -415,14 +415,14 @@ if projectpath:
                 activate = False,
                 audit = False,
                 detach = 1,
-                closeallws=name_ws)
+                closeallws=False)
             
             ViewExportId = get_ViewExportId(docmodel,name_view)
             if not ViewExportId:
                 closed_model(docmodel)
                 continue
             try:
-                export_NWC(docmodel,ViewExportId)
+                export_NWC(docmodel,ViewExportId,folder_path,prefix,suffix)
                 closed_model(docmodel)
             except Exception as e:
                 output.print_md("- :cross_mark: Ошибка экпорта! Код ошибки:" + str(e))                

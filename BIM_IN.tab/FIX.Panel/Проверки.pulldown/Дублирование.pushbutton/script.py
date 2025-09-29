@@ -13,8 +13,7 @@ lfy = output.linkify
 doc = revit.doc
 user = __revit__.Application.Username
 
-from logIN import lg
-lg(doc, title)
+
 
 def find_duplicates_groups(d):
     # Получаем все предупреждения

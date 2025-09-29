@@ -4,7 +4,8 @@ layout:
   - OpenModels
   - ClosedModels
   - EXPORT_NWC
-
+  - CreateCoordPlan
+  - CreateNavisView
 background:
   #panel: '#EEEEEE'
   title: '#BCE5E5'

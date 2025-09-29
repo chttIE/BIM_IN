@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 import ctypes
 from Autodesk.Revit.DB import  Category, Element, ExternalResourceType, Family, MEPSystemType,\
-      FilteredElementCollector as FEC, RevitLinkInstance, WorksharingUtils
+      FilteredElementCollector as FEC, RevitLinkInstance, WorksharingUtils,Transaction,ElementId,BuiltInCategory
 from pyrevit import forms, script
 import os
 import io
 
 from pyrevit.coreutils import Guid
 from pyrevit.framework import Diagnostics
-
+# Импортируем .NET List
+import clr
+clr.AddReference('System')
+from System.Collections.Generic import List
 
 DEFAULT_INPUTWINDOW_WIDTH = 500
 
@@ -435,6 +438,110 @@ def sel_open_fam(title='Select Open Familys',
             filterfunc=filterfunc
             )
 
+
+def collect_elements_on_view(doc,view=None,
+                             exclude_categories=None,
+                             exclude_classes=None,
+                             preview='off'):
+    """
+    Собирает элементы, видимые на (view|ActiveView), с расширяемыми исключениями.
+    Может включить временное превью:
+      preview='off'        — без превью (по умолчанию)
+      preview='isolate'    — временно изолировать собранные элементы
+      preview='hide_others'— синоним isolate (скрыть всё остальное)
+      preview='hide'       — временно скрыть САМИ собранные элементы
+
+    :param view: View | None
+    :param exclude_categories: iterable[BuiltInCategory]
+    :param exclude_classes: iterable[type] (классы API, напр. CurveElement)
+    :return: list[Element]
+    """
+    if view is None:
+        view = __revit__.ActiveUIDocument.ActiveView
+    category = []
+    # дефолтные исключения: линии и камеры
+    default_excluded_cats = {
+        BuiltInCategory.OST_Lines,
+        BuiltInCategory.OST_Cameras
+    }
+    excluded_cats = set(exclude_categories or []).union(default_excluded_cats)
+    excluded_classes = set(exclude_classes or [])
+
+    col = (FEC(doc, view.Id)
+           .WhereElementIsNotElementType())
+
+    result = []
+    for el in col:
+        # исключения по классу
+        if excluded_classes and any(isinstance(el, cls) for cls in excluded_classes):
+            continue
+        
+        # исключения по категории
+        cat = el.Category
+        if cat is None:
+            continue
+        try:
+            # BuiltInCategory у системных категорий — отрицательный int id
+            bic = BuiltInCategory(cat.Id.IntegerValue)
+            if bic in excluded_cats:
+                continue
+            if cat.Name not in category:
+                category.append(cat.Name)
+        except:
+            # не BuiltInCategory — пропускаем проверку
+            pass
+
+        result.append(el)
+
+    # превью через временную изоляцию/скрытие
+    if preview and preview.lower() != 'off':
+        _apply_temp_preview(doc,view, result, mode=preview.lower())
+
+    return result,category
+
+
+def _apply_temp_preview(doc,view, elements, mode='isolate'):
+    """
+    Включает временное превью на виде:
+      - 'isolate' / 'hide_others' — IsolateElementsTemporary(IDs)
+      - 'hide'                    — HideElementsTemporary(IDs)
+    """
+    ids = List[ElementId]([e.Id for e in elements])
+
+    with Transaction(doc, "Preview collected elements") as t:
+        t.Start()
+        if mode in ('isolate', 'hide_others'):
+            view.IsolateElementsTemporary(ids)
+        elif mode == 'hide':
+            view.HideElementsTemporary(ids)
+        else:
+            t.RollBack()
+            return
+        t.Commit()
+
+def search_and_change_parameters_for_element(doc,elements,name_parameter,text):
+    bad= []
+    g,i = 0,0
+    with Transaction(doc,"Заполнение параметра") as t:
+        t.Start()
+        try:
+            for el in elements:
+                p_d = el.LookupParameter(name_parameter)
+                if p_d and not p_d.IsReadOnly: 
+                    if p_d.AsString() == text:
+                        i+=1
+                        continue
+                    else:
+                        p_d.Set(text)
+                        g+=1
+                else:
+                    bad.append(el)
+            doc.Regenerate()
+        except Exception as e:
+            print("- ОШИБКА {} Нет параметра у {} - категория {}".format(str(e),el.Id,el.Category))
+
+        t.Commit()
+    return bad,g,i
 
 
 def get_familysymbol(doc):

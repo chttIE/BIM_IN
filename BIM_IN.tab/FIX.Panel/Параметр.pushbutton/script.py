@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-"
 """
 Скрипт для pyRevit (IronPython 2.7)
 Задача:
