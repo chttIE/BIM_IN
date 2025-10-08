@@ -41,7 +41,7 @@ def changes(elements):
                 if not (p_1 and p_2 and p_3 and p_4):
                     print("ОДИН ИЗ ПАРАМЕТРОВ {} {} {} {} ОТСУТСТВУЕТ У ЭЛЕМЕНТА {} ОТРЕДАКТИРУЙТЕ ПАРАМЕТРЫ!".format(name_parameter1,name_parameter2,name_parameter3,name_parameter4,lfy(el.Id)))
                     continue
-                text = "{}+{}+{}+{}".format(p_1.AsString(),p_2.AsString(),p_3.AsString(),p_4.AsString())
+                text = "{1}{0}{2}{0}{3}{0}{4}".format(separator,p_1.AsString(),p_2.AsString(),p_3.AsString(),p_4.AsString())
                 if not p_in:
                     print("ПАРАМЕТР ДЛЯ ЗАПОЛНЕНИЯ ОТСУТСТВУЕТ {} ОТРЕДАКТИРУЙТЕ ПАРАМЕТРЫ!".format(lfy(el.Id)))
                     continue
