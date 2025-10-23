@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-"
 
-from Autodesk.Revit.DB import BuiltInCategory, ElementId, Transaction
+from Autodesk.Revit.DB import BuiltInCategory, ElementId, FamilyInstance, Transaction, FilteredElementCollector
 from pyrevit import script
 from sup import collect_elements_on_view
 
 
 
-
+from Autodesk.Revit.DB import FilteredElementCollector as FEC
+ 
 
 doc     = __revit__.ActiveUIDocument.Document   # type: ignore
 app     = __revit__.Application                 # type: ignore
@@ -17,6 +18,10 @@ lfy = output.linkify
 output.close_others(True)
 name_parameter = "Код_семейства_Revit"
 
+fams = FEC(doc).OfClass(FamilyInstance).WhereElementIsNotElementType().ToElements()
+
+for el in fams:
+	print(el.Name)
 
 category_codes = {
     # BuiltInCategory.OST_Abuts: "УС",
@@ -98,9 +103,11 @@ category_codes = {
     BuiltInCategory.OST_Stairs: "ЛС",
     BuiltInCategory.OST_StairsLandings: "ЛС",
     BuiltInCategory.OST_StairsRuns: "ЛС",
+    BuiltInCategory.OST_StairsStringerCarriage: "ЛС",
     BuiltInCategory.OST_StructuralColumns: "КК",
     BuiltInCategory.OST_StructuralFoundation: "СФ",
     BuiltInCategory.OST_StructuralFraming: "СК",
+    
     # BuiltInCategory.OST_Structural: "СА",
     BuiltInCategory.OST_StructuralStiffener: "СРЖ",
     BuiltInCategory.OST_StructuralTruss: "СФ",
@@ -131,6 +138,8 @@ def get_category_code(element):
         return None
 
 
+
+
 def changes(elements):
     bad= []
     g,i = 0,0
@@ -143,7 +152,7 @@ def changes(elements):
                 p_d = el.LookupParameter(name_parameter)
                 text = get_category_code(el)
                 if not text:
-                    print("ПУСТОЙ УРОВНЬ У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
+                    print("ПУСТОЙ УРОВНЬ У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ! - КАТЕГОРИЯ {}".format(lfy(el.Id),el.Category.Name))
                     continue
 
                 
@@ -180,11 +189,7 @@ def changes(elements):
 
 
 # Сбор элементов с вида
-custom,category = collect_elements_on_view(doc,
-    exclude_categories=[BuiltInCategory.OST_SWallRectOpening,
-                        BuiltInCategory.OST_Cameras],
-    exclude_classes=[],
-    preview="off")
+custom,category = collect_elements_on_view(doc)
 output.freeze()
 output.print_md("___")
 

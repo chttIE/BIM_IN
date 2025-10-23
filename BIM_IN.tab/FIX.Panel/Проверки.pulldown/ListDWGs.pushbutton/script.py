@@ -9,8 +9,8 @@ from pyrevit import forms
 
 doc = __revit__.ActiveUIDocument.Document
 output = script.get_output()
-from logIN import lg
-lg(doc,"Список DWG")
+
+
 def lst_len(lst):
     return sum(1 for _ in lst)
 

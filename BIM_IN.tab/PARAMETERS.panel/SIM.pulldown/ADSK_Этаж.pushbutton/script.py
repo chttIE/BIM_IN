@@ -133,7 +133,8 @@ def get_adsks_floor_value(level_name,ref_floor_value=10.0):
 
     if not level_name:
         return None
-
+    if "Roof" in level_name: 
+        return "Roof"
     # 3. Разбиваем по "_"
     parts = level_name.split("_")
     if len(parts) < 3:
@@ -182,16 +183,23 @@ def changes(elements):
                     bad.append("ИМЯ УРОВНЯ НЕДОСТУПНО У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
                     continue
 
-                
                 text = get_adsks_floor_value(text)
-                
+
+                text = str(text)
+
+                # убираем ведущие нули
+                text = re.sub(r'(?<=- )0+(\d+)\b', r'\1', text)  # "- 09" -> "- 9"
+                text = re.sub(r'(?<=-)0+(\d+)\b',  r'\1', text)  # "-09"  -> "-9"
+                text = re.sub(r'\b0+(\d+)\b',      r'\1', text)  # "08"   -> "8"
+                # ...
+
                 if not p_d:
                     bad.append("ПАРАМЕТР ДЛЯ ЗАПОЛНЕНИЯ ОТСУТСТВУЕТ {} ОТРЕДАКТИРУЙТЕ ПАРАМЕТРЫ!".format(lfy(el.Id)))
                     continue
                 if p_d.IsReadOnly: 
                     bad.append("ПАРАМЕТР ДЛЯ ЗАПОЛНЕНИЯ ДОСТУПЕН ТОЛЬКО ДЛЯ ЧТЕНИЯ {} ОТРЕДАКТИРУЙТЕ ПАРАМЕТРЫ!".format(lfy(el.Id)))
                     continue
-                if p_d.AsString() == text:
+                if str(p_d.AsString()) == str(text):
                     i+=1
                     continue
                 else:

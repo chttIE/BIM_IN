@@ -460,32 +460,27 @@ def collect_elements_on_view(doc,view=None,
         view = __revit__.ActiveUIDocument.ActiveView
     category = []
     # дефолтные исключения: линии и камеры
-    default_excluded_cats = {
-        BuiltInCategory.OST_Lines,
-        BuiltInCategory.OST_Cameras
-    }
-    excluded_cats = set(exclude_categories or []).union(default_excluded_cats)
-    excluded_classes = set(exclude_classes or [])
-
+    exclude_category_names=["Камеры", "Оси", "Линии моделей","Виды","Границы 3D вида"]
     col = (FEC(doc, view.Id)
            .WhereElementIsNotElementType())
-
+    namecatforignore = ["Камеры","Оси"]
     result = []
     for el in col:
-        # исключения по классу
-        if excluded_classes and any(isinstance(el, cls) for cls in excluded_classes):
-            continue
-        
+
         # исключения по категории
         cat = el.Category
+        try:
+            cat_name = cat.Name
+        except:
+            cat_name = "ERROR"
+
         if cat is None:
             continue
         try:
             # BuiltInCategory у системных категорий — отрицательный int id
             bic = BuiltInCategory(cat.Id.IntegerValue)
-            if bic in excluded_cats:
-                continue
-            if cat.Name not in category:
+
+            if cat_name not in category and cat_name not in exclude_category_names:
                 category.append(cat.Name)
         except:
             # не BuiltInCategory — пропускаем проверку
