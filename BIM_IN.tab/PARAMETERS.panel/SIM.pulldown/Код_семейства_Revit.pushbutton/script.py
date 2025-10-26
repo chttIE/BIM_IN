@@ -20,8 +20,8 @@ name_parameter = "Код_семейства_Revit"
 
 fams = FEC(doc).OfClass(FamilyInstance).WhereElementIsNotElementType().ToElements()
 
-for el in fams:
-	print(el.Name)
+# for el in fams:
+# 	print(el.Name)
 
 category_codes = {
     # BuiltInCategory.OST_Abuts: "УС",
