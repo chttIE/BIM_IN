@@ -7,7 +7,7 @@ title:
     View
   ru: |-
     Вид
-    Navis
+    Navisworks
 tooltip: 
   es_es: >-
     Crea un nuevo 3D Vista para exportar a Navisworks.
@@ -29,6 +29,6 @@ tooltip:
     Производит поиск существующих 3D видов и в случае наличия существуюего вида
     даёт возможность удалить и создать новый или оставить текущий.
 
-author: Roman Golev
+author: Roman Golev, я чуть под себя пофиксил
 engine:
   persistent: true
