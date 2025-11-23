@@ -342,7 +342,7 @@ def save_as_model(d,
     sop.Compact = compact
     sop.MaximumBackups = maxbackups
     sop.OverwriteExistingFile = overwrite
-    sop.
+
     try: 
         d.SaveAs(path, sop)
         output.print_md("-  :white_heavy_check_mark: **Модель сохранена**")

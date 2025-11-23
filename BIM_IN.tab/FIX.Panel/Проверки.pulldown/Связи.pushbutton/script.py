@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from logIN import lg
+
 from Autodesk.Revit.DB import BuiltInParameter, FilteredElementCollector as FEC, RevitLinkInstance
 from pyrevit import revit,forms,script,output
 title = 'Связи'
@@ -72,6 +72,6 @@ def links(doc):
         )
     else:
         forms.alert('Связи в проекте отсутствуют',ok=False, exitscript=True)
-lg(doc,title)
+
 links(doc)
 print("")
