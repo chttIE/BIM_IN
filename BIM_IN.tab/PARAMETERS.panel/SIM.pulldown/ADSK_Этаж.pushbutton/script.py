@@ -22,6 +22,7 @@ def get_level(element):
     # Пробуем получить уровень по LevelId
     if hasattr(element, "LevelId"):
         level = doc.GetElement(element.LevelId)
+        print(level.Name)
         if level:
             return level
 

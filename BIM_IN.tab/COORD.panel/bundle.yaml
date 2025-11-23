@@ -4,6 +4,7 @@ layout:
   - OpenModels
   - ClosedModels
   - EXPORT_NWC
+  - ExportRVT
   - CreateCoordPlan
   - CreateNavisView
 background:

@@ -163,14 +163,14 @@ def open_model( path,
         # Специальный режим: сохранить РН + выгрузить RVT-связи в TransmissionData
         options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets
         DetachFromCentralOption.ClearTransmittedSaveAsNewCentral
-        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) + **выгрузить RVT-связи**")
-        try:
-            # помечаем как переданный: опционально, но уместно в этом сценарии
-            _unload_rvt_links_before_open(path, mark_transmitted=True,
-                                          logfn=(output.print_md if log > 1 else None))
-        except Exception as ex:
-            if log > 0:
-                output.print_md(u"- ⚠️ Не удалось выгрузить RVT-связи через TransmissionData: **{}**".format(ex))
+        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) ")
+        # try:
+        #     # помечаем как переданный: опционально, но уместно в этом сценарии
+        #     _unload_rvt_links_before_open(path, mark_transmitted=True,
+        #                                   logfn=(output.print_md if log > 1 else None))
+        # except Exception as ex:
+        #     if log > 0:
+        #         output.print_md(u"- ⚠️ Не удалось выгрузить RVT-связи через TransmissionData: **{}**".format(ex))
     else:
         # на всякий
         options.DetachFromCentralOption = DetachFromCentralOption.DoNotDetach
@@ -342,6 +342,7 @@ def save_as_model(d,
     sop.Compact = compact
     sop.MaximumBackups = maxbackups
     sop.OverwriteExistingFile = overwrite
+    sop.
     try: 
         d.SaveAs(path, sop)
         output.print_md("-  :white_heavy_check_mark: **Модель сохранена**")
