@@ -574,3 +574,49 @@ def get_familysymbol(doc):
                     return f
         else: script.exit()
     else: script.exit()
+
+
+def select_file_local():
+    #Функция не используется. 
+    folder_path = forms.pick_folder()
+    if not folder_path:
+        return False
+
+    def list_files_in_folder(folder_path):
+        lst_model = []
+        try:
+            for file in os.listdir(folder_path):
+                lst_model.append(file.split(".txt")[0])
+        except OSError as e:
+            print("Ошибка чтения папки {}: {}".format(folder_path, e))
+        return lst_model
+
+    sel = list_files_in_folder(folder_path)
+
+    if sel:
+        selected_file = forms.SelectFromList.show(sel,
+                                                title="Выбор объекта",
+                                                width=400,
+                                                button_name='Выбрать')
+    if selected_file:
+        file_path = os.path.join(folder_path, selected_file)
+        
+        # Чтение содержимого файла и запись в список lst_model_project
+        lst_model_project = []
+        try:
+            with open(file_path+ ".txt", 'r') as file:
+                for line in file:
+                    lst_model_project.append(line.decode('utf-8').strip())
+        except OSError as e:
+            print("Ошибка при чтении файла {}: {}".format(file_path, e))
+
+        with forms.WarningBar(title="Выбор моделей"):
+            items = forms.SelectFromList.show(lst_model_project,
+                                                title='Выбор моделей',
+                                                multiselect=True,
+                                                button_name='Выбрать',
+                                                width=800,
+                                                height=800
+                                                )
+        if items: return items
+        else: script.exit()

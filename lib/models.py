@@ -501,7 +501,10 @@ def add_link(d,path, placement_method=0, closed_ws=False, type_link=False):
         ```
     """
     timer = coreutils.Timer()
-    name_model = os.path.basename(path)
+    try:
+        name_model = os.path.basename(path)
+    except:
+        name_model = path
     model_path = convert_path(path)
     if closed_ws:
         wsc = WorksetConfiguration(WorksetConfigurationOption.CloseAllWorksets)
