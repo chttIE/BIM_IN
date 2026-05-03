@@ -1,0 +1,144 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Элементы на уровне"
+        Width="420"
+        Height="420"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F3F4F6"
+        Topmost="True">
+    <Grid Margin="16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <TextBlock Text="Элементы на уровне"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,12"/>
+
+        <!-- LEVEL SELECT -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+            <TextBlock Text="Уровень"
+                       FontSize="12"
+                       Foreground="#6B7280"
+                       Margin="0,0,0,4"/>
+            <ComboBox x:Name="level_combo"
+                    Height="32"
+                    DisplayMemberPath="Name"
+                    Background="White"
+                    BorderBrush="#D1D5DB"
+                    VerticalContentAlignment="Center"
+                    Padding="6,0"/>
+        </StackPanel>
+
+        <!-- ACTION BLOCK -->
+        <Border Grid.Row="2"
+                Background="White"
+                CornerRadius="10"
+                Padding="12"
+                Margin="0,0,0,12">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEVEL -->
+
+                <Button x:Name="select_level_btn"
+                        Content="🖱"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Height="32"
+                        Margin="0,0,6,6"
+                        Background="#E5E7EB"
+                        BorderThickness="0"/>
+
+                <Button x:Name="show_level_btn"
+                        Content="Изолировать элементы на уровне"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Height="32"
+                        Margin="0,0,0,6"
+                        Background="#3B82F6"
+                        Foreground="White"
+                        BorderThickness="0"/>
+
+                <!-- NO LEVEL -->
+                <Button x:Name="select_no_level_btn"
+                        Content="🖱"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Height="32"
+                        Background="#E5E7EB"
+                        BorderThickness="0"
+                        Margin="0,0,6,0"/>
+
+                <Button x:Name="no_level_btn"
+                        Content="Без уровня"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Height="32"
+                        Background="#EF4444"
+                        Foreground="White"
+                        BorderThickness="0"/>
+
+            </Grid>
+        </Border>
+
+        <!-- COLOR BLOCK -->
+        <Border Grid.Row="3"
+                Background="White"
+                CornerRadius="10"
+                Padding="12"
+                Margin="0,0,0,12">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="color_level_btn"
+                        Content="🎨 Покрасить"
+                        Grid.Column="0"
+                        Height="32"
+                        Margin="0,0,6,0"
+                        Background="#10B981"
+                        Foreground="White"
+                        BorderThickness="0"/>
+
+                <Button x:Name="reset_color_btn"
+                        Content="❌ Сброс цвета"
+                        Grid.Column="1"
+                        Height="32"
+                        Background="#9CA3AF"
+                        Foreground="White"
+                        BorderThickness="0"/>
+            </Grid>
+        </Border>
+
+        <!-- RESET -->
+        <Button x:Name="reset_btn"
+                Grid.Row="4"
+                Content="🔄 Сбросить вид"
+                Height="36"
+                Background="#374151"
+                Foreground="White"
+                BorderThickness="0"/>
+
+    </Grid>
+</Window>
