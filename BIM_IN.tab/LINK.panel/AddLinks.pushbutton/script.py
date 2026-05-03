@@ -6,7 +6,6 @@ __highlight__ = 'updated'
 from Autodesk.Revit.DB import RevitLinkInstance,FilteredElementCollector as FEC,Transaction
 from pyrevit import script, coreutils
 from sup import select_file_local
-from logIN import lg
 from models import add_link
 import datetime
 import os
@@ -71,7 +70,6 @@ if sel_links:
     t_timer = coreutils.Timer()  
     output.update_progress(0, len(sel_links))
     with Transaction(doc, 'Добавление связей') as t:
-        lg(doc,__title__)
         t.Start() 
         for i, l in enumerate(sel_links):
                 name_model = os.path.basename(l)
@@ -83,7 +81,7 @@ if sel_links:
                     output.print_md("- :information: Связь **{}** уже существует".format(name_model))
                     continue
                 try:
-                    add_link(l,placement_method,closed_ws)
+                    add_link(doc,l,placement_method,closed_ws)
                 except Exception as e:
                     output.print_md("- :cross_mark: Ошибка в связи {}. \
                                     Ошибка: {}".format(name_model, str(e)))

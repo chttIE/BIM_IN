@@ -460,32 +460,27 @@ def collect_elements_on_view(doc,view=None,
         view = __revit__.ActiveUIDocument.ActiveView
     category = []
     # дефолтные исключения: линии и камеры
-    default_excluded_cats = {
-        BuiltInCategory.OST_Lines,
-        BuiltInCategory.OST_Cameras
-    }
-    excluded_cats = set(exclude_categories or []).union(default_excluded_cats)
-    excluded_classes = set(exclude_classes or [])
-
+    exclude_category_names=["Камеры", "Оси", "Линии моделей","Виды","Границы 3D вида"]
     col = (FEC(doc, view.Id)
            .WhereElementIsNotElementType())
-
+    namecatforignore = ["Камеры","Оси"]
     result = []
     for el in col:
-        # исключения по классу
-        if excluded_classes and any(isinstance(el, cls) for cls in excluded_classes):
-            continue
-        
+
         # исключения по категории
         cat = el.Category
+        try:
+            cat_name = cat.Name
+        except:
+            cat_name = "ERROR"
+
         if cat is None:
             continue
         try:
             # BuiltInCategory у системных категорий — отрицательный int id
             bic = BuiltInCategory(cat.Id.IntegerValue)
-            if bic in excluded_cats:
-                continue
-            if cat.Name not in category:
+
+            if cat_name not in category and cat_name not in exclude_category_names:
                 category.append(cat.Name)
         except:
             # не BuiltInCategory — пропускаем проверку
@@ -579,3 +574,49 @@ def get_familysymbol(doc):
                     return f
         else: script.exit()
     else: script.exit()
+
+
+def select_file_local():
+    #Функция не используется. 
+    folder_path = forms.pick_folder()
+    if not folder_path:
+        return False
+
+    def list_files_in_folder(folder_path):
+        lst_model = []
+        try:
+            for file in os.listdir(folder_path):
+                lst_model.append(file.split(".txt")[0])
+        except OSError as e:
+            print("Ошибка чтения папки {}: {}".format(folder_path, e))
+        return lst_model
+
+    sel = list_files_in_folder(folder_path)
+
+    if sel:
+        selected_file = forms.SelectFromList.show(sel,
+                                                title="Выбор объекта",
+                                                width=400,
+                                                button_name='Выбрать')
+    if selected_file:
+        file_path = os.path.join(folder_path, selected_file)
+        
+        # Чтение содержимого файла и запись в список lst_model_project
+        lst_model_project = []
+        try:
+            with open(file_path+ ".txt", 'r') as file:
+                for line in file:
+                    lst_model_project.append(line.decode('utf-8').strip())
+        except OSError as e:
+            print("Ошибка при чтении файла {}: {}".format(file_path, e))
+
+        with forms.WarningBar(title="Выбор моделей"):
+            items = forms.SelectFromList.show(lst_model_project,
+                                                title='Выбор моделей',
+                                                multiselect=True,
+                                                button_name='Выбрать',
+                                                width=800,
+                                                height=800
+                                                )
+        if items: return items
+        else: script.exit()

@@ -163,14 +163,14 @@ def open_model( path,
         # Специальный режим: сохранить РН + выгрузить RVT-связи в TransmissionData
         options.DetachFromCentralOption = DetachFromCentralOption.DetachAndPreserveWorksets
         DetachFromCentralOption.ClearTransmittedSaveAsNewCentral
-        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) + **выгрузить RVT-связи**")
-        try:
-            # помечаем как переданный: опционально, но уместно в этом сценарии
-            _unload_rvt_links_before_open(path, mark_transmitted=True,
-                                          logfn=(output.print_md if log > 1 else None))
-        except Exception as ex:
-            if log > 0:
-                output.print_md(u"- ⚠️ Не удалось выгрузить RVT-связи через TransmissionData: **{}**".format(ex))
+        if log > 0: output.print_md("- Открытие **с отсоединением** (сохранить РН) ")
+        # try:
+        #     # помечаем как переданный: опционально, но уместно в этом сценарии
+        #     _unload_rvt_links_before_open(path, mark_transmitted=True,
+        #                                   logfn=(output.print_md if log > 1 else None))
+        # except Exception as ex:
+        #     if log > 0:
+        #         output.print_md(u"- ⚠️ Не удалось выгрузить RVT-связи через TransmissionData: **{}**".format(ex))
     else:
         # на всякий
         options.DetachFromCentralOption = DetachFromCentralOption.DoNotDetach
@@ -342,6 +342,7 @@ def save_as_model(d,
     sop.Compact = compact
     sop.MaximumBackups = maxbackups
     sop.OverwriteExistingFile = overwrite
+
     try: 
         d.SaveAs(path, sop)
         output.print_md("-  :white_heavy_check_mark: **Модель сохранена**")
@@ -500,7 +501,10 @@ def add_link(d,path, placement_method=0, closed_ws=False, type_link=False):
         ```
     """
     timer = coreutils.Timer()
-    name_model = os.path.basename(path)
+    try:
+        name_model = os.path.basename(path)
+    except:
+        name_model = path
     model_path = convert_path(path)
     if closed_ws:
         wsc = WorksetConfiguration(WorksetConfigurationOption.CloseAllWorksets)

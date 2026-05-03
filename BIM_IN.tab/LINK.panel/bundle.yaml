@@ -1,6 +1,7 @@
 title: LINKS
 layout:
   - AddLinks
+  - WSforLinks
 
 background:
   #panel: '#EEEEEE'

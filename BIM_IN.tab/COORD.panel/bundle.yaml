@@ -6,6 +6,8 @@ layout:
   - EXPORT_NWC
   - CreateCoordPlan
   - CreateNavisView
+  - ActiveNWV
+  - ExportRVT
 background:
   #panel: '#EEEEEE'
   title: '#BCE5E5'
