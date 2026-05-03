@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-"
 from pyrevit import script
-from Autodesk.Revit.DB import BuiltInCategory, BuiltInParameter, Transaction
+from Autodesk.Revit.DB import BuiltInCategory, BuiltInParameter, FilteredElementCollector as FEC, Level, Transaction
 from sup import collect_elements_on_view
 
 
@@ -172,24 +172,17 @@ def changes(elements):
                     continue  # уже заполнено — исключаем
                 
                 p_d = el.LookupParameter(name_parameter)
- 
-                level = get_level(el)
-                if not level:
-                    bad.append("УРОВНЬ У ЭЛЕМЕНТА {} НЕ УДАЛОСЬ ПОЛУЧИТЬ!".format(lfy(el.Id)))
-                    continue
-                text = level.LookupParameter(name_parameter).AsString()
-                # text = level.Name
+
+                # level = get_level(el)
+                # if not level:
+                #     bad.append("ПУСТОЙ УРОВНЬ У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
+                #     continue
+                text = el.Name
                 
                 if not text: 
-                    bad.append("ПАРАМЕТР ADSK_ЭТАЖ У УРОВНЯ {} НЕДОСТУПЕН!".format(lfy(el.Id)))
+                    bad.append("ИМЯ УРОВНЯ НЕДОСТУПНО У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
                     continue
-
-                if str(text) == "":
-                    massage = "ПАРАМЕТР ADSK_ЭТАЖ У УРОВНЯ {} НЕ ЗАПОЛНЕН".format(lfy(el.Id))
-                    if massage not in bad: 
-                        bad.append("ПАРАМЕТР ADSK_ЭТАЖ У УРОВНЯ {} НЕ ЗАПОЛНЕН".format(lfy(el.Id)))
-                    continue
-                # text = str(text).split("_")[3]
+                text = str(text).split("_")[3]
                 # print(text)
                 # text = get_adsks_floor_value(text)
 
@@ -206,8 +199,8 @@ def changes(elements):
                     continue
                 if p_d.IsReadOnly: 
                     bad.append("ПАРАМЕТР ДЛЯ ЗАПОЛНЕНИЯ ДОСТУПЕН ТОЛЬКО ДЛЯ ЧТЕНИЯ {} ОТРЕДАКТИРУЙТЕ ПАРАМЕТРЫ!".format(lfy(el.Id)))
-                if str(p_d.AsString()) == str(text):
                     continue
+                if str(p_d.AsString()) == str(text):
                     i+=1
                     continue
                 else:
@@ -240,7 +233,7 @@ output.print_md("___")
 # for el in custom:
 #     level = get_level(el)
 
-
+custom = FEC(doc).OfClass(Level).WhereElementIsNotElementType().ToElements()
 bad,g,i = changes(custom)
 # if bad:
 #     output.print_md("ПРОБЛЕМЫ:")

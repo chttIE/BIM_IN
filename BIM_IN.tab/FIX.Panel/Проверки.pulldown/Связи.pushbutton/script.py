@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from Autodesk.Revit.DB import BuiltInParameter, FilteredElementCollector as FEC, RevitLinkInstance
 from pyrevit import revit,forms,script,output
 title = 'Связи'

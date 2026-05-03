@@ -126,11 +126,12 @@ def changes(elements):
                 p_p = el.LookupParameter(name_parameter2)
                 level = get_level(el)
                 if not level:
-                    bad.append("ПУСТОЙ УРОВНЬ У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
+                    print("ПУСТОЙ УРОВНЬ У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
                     continue
                 text = level.Name
                 
                 if not text: 
+                
                     bad.append("ИМЯ УРОВНЯ НЕДОСТУПНО У ЭЛЕМЕНТА {} ЗАПОЛНИТЕ РУКАМИ!".format(lfy(el.Id)))
                     continue
                 p_p.Set(text)

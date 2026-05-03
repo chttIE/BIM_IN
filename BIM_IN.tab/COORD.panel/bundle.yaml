@@ -4,6 +4,8 @@ layout:
   - OpenModels
   - ClosedModels
   - EXPORT_NWC
+  - ExportRVT
+  - ResaveRVT
   - CreateCoordPlan
   - CreateNavisView
   - ActiveNWV
