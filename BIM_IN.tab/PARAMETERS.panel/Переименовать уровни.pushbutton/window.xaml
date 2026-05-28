@@ -1,0 +1,143 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Переименование уровней"
+        Width="820"
+        Height="520"
+        MinWidth="760"
+        MinHeight="430"
+        WindowStartupLocation="CenterScreen"
+        Background="#F3F4F6"
+        Topmost="True">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Переименование уровней"
+                   FontSize="17"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10"/>
+
+        <Border Grid.Row="1"
+                Background="White"
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="110"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="Искать"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <TextBox x:Name="find_box"
+                         Grid.Column="1"
+                         Height="28"
+                         Padding="6,3"
+                         VerticalContentAlignment="Center"
+                         Margin="0,0,12,0"/>
+
+                <TextBlock Grid.Column="2"
+                           Text="Заменить на"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <TextBox x:Name="replace_box"
+                         Grid.Column="3"
+                         Height="28"
+                         Padding="6,3"
+                         VerticalContentAlignment="Center"
+                         Margin="0,0,12,0"/>
+
+                <Button x:Name="replace_btn"
+                        Grid.Column="4"
+                        Content="ОК"
+                        Height="30"
+                        Background="#E5E7EB"
+                        BorderBrush="#D1D5DB"/>
+            </Grid>
+        </Border>
+
+        <DataGrid x:Name="levels_grid"
+                  Grid.Row="2"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False"
+                  GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column"
+                  SelectionMode="Extended"
+                  SelectionUnit="CellOrRowHeader"
+                  Background="White"
+                  BorderBrush="#D1D5DB"
+                  BorderThickness="1"
+                  RowHeaderWidth="0"
+                  AlternatingRowBackground="#F9FAFB"
+                  FontSize="13">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Фасад"
+                                    Binding="{Binding ElevationText}"
+                                    Width="90"
+                                    IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Имя" Width="230" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Name}"
+                                     IsReadOnly="True"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     Padding="4,0"
+                                     VerticalContentAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Новое имя"
+                                    Binding="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
+                                    Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Применение выполняется одной транзакцией. Автозамену можно откатить через Ctrl+Z до нажатия Применить."
+                       Foreground="#6B7280"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"/>
+
+            <Button x:Name="close_btn"
+                    Grid.Column="1"
+                    Content="Отмена"
+                    Height="34"
+                    Margin="0,0,8,0"
+                    Background="#E5E7EB"
+                    BorderBrush="#D1D5DB"/>
+
+            <Button x:Name="apply_btn"
+                    Grid.Column="2"
+                    Content="Применить"
+                    Height="34"
+                    Background="#2563EB"
+                    Foreground="White"
+                    BorderBrush="#1D4ED8"/>
+        </Grid>
+    </Grid>
+</Window>

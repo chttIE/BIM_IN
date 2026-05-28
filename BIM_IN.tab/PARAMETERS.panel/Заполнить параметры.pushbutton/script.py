@@ -7,7 +7,7 @@ import codecs
 import os
 import re
 
-from Autodesk.Revit.DB import FilteredElementCollector, StorageType, Transaction
+from Autodesk.Revit.DB import CheckoutStatus, FilteredElementCollector, StorageType, Transaction, WorksharingUtils
 from pyrevit import forms, script
 
 
@@ -20,6 +20,7 @@ output.close_others(all_open_outputs=True)
 CODE_PARAMETER = "RUS_MSSK_Element_Code"
 NAME_PARAMETER = "RUS_MSSK_Element_Name"
 CLASSIFIER_FILE = u"Классификатор МССК_v5.txt"
+NOT_CLASSIFIED_CODE = "999"
 
 
 def get_script_folder():
@@ -108,6 +109,47 @@ def set_existing_string_parameter(parameter, value):
 
     parameter.Set(new_value)
     return True, None
+
+
+def get_string_parameter_write_issue(parameter, value):
+    if parameter.IsReadOnly:
+        return "readonly parameter"
+
+    if parameter.StorageType != StorageType.String:
+        return "not a string parameter"
+
+    current_value = clean_text(parameter.AsString())
+    new_value = clean_text(value)
+
+    if current_value == new_value:
+        return "same value"
+
+    return None
+
+
+def get_worksharing_lock_reason(element):
+    if not doc.IsWorkshared:
+        return None
+
+    try:
+        checkout_status = WorksharingUtils.GetCheckoutStatus(doc, element.Id)
+    except Exception as error:
+        return u"ошибка проверки занятости элемента: {}".format(error)
+
+    if checkout_status != CheckoutStatus.OwnedByOtherUser:
+        return None
+
+    owner = None
+    try:
+        tooltip_info = WorksharingUtils.GetWorksharingTooltipInfo(doc, element.Id)
+        owner = clean_text(tooltip_info.Owner)
+    except:
+        pass
+
+    if owner:
+        return u"элемент занят другим пользователем: {}".format(owner)
+
+    return u"элемент занят другим пользователем"
 
 
 def get_element_key(element):
@@ -224,6 +266,7 @@ def fill_names(elements, classifier):
     already_filled = 0
     skipped_type_duplicates = 0
     empty_code = []
+    not_classified = []
     code_not_found = []
     write_errors = []
     processed_type_names = set()
@@ -248,18 +291,27 @@ def fill_names(elements, classifier):
                 empty_code.append(element)
                 continue
 
+            if code == NOT_CLASSIFIED_CODE:
+                not_classified.append(element)
+                continue
+
             name = classifier.get(code)
             if not name:
                 code_not_found.append((element, code))
                 continue
 
-            ok, reason = set_existing_string_parameter(name_parameter, name)
-            if ok:
-                changed += 1
-            elif reason == "same value":
+            write_issue = get_string_parameter_write_issue(name_parameter, name)
+            if write_issue == "same value":
                 already_filled += 1
+            elif write_issue:
+                write_errors.append((element, write_issue))
             else:
-                write_errors.append((element, reason))
+                lock_reason = get_worksharing_lock_reason(name_owner)
+                if lock_reason:
+                    write_errors.append((name_owner, lock_reason))
+                else:
+                    name_parameter.Set(clean_text(name))
+                    changed += 1
 
             if name_scope == "type":
                 processed_type_names.add(type_key)
@@ -271,6 +323,7 @@ def fill_names(elements, classifier):
         "already_filled": already_filled,
         "skipped_type_duplicates": skipped_type_duplicates,
         "empty_code": empty_code,
+        "not_classified": not_classified,
         "code_not_found": code_not_found,
         "write_errors": write_errors,
     }
@@ -288,6 +341,7 @@ def print_report(elements_count, classifier_count, result, collect_mode):
     output.print_md("- Уже было заполнено: **{}**".format(result["already_filled"]))
     output.print_md("- Пропущено повторов типоразмера: **{}**".format(result["skipped_type_duplicates"]))
     output.print_md("- Пустой код: **{}**".format(len(result["empty_code"])))
+    output.print_md("- Не классифицируется (`{}`): **{}**".format(NOT_CLASSIFIED_CODE, len(result["not_classified"])))
     output.print_md("- Код не найден: **{}**".format(len(result["code_not_found"])))
     output.print_md("- Ошибок записи: **{}**".format(len(result["write_errors"])))
 

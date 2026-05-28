@@ -2,7 +2,6 @@
 from pyrevit import output,script
 from Autodesk.Revit.DB import FilteredElementCollector as FEC,\
                             BuiltInParameter, BuiltInCategory, WorksharingUtils
-from logIN import lg
 
 title = "Оси и уровни"
 doc = __revit__.ActiveUIDocument.Document
@@ -13,7 +12,6 @@ output.close_others(all_open_outputs=True)
 output.set_title(title)
 output.set_width(1500)
 lfy = output.linkify
-lg(doc, title)
 
 def get_ws_el(el):
     try:return el.get_Parameter(BuiltInParameter.ELEM_PARTITION_PARAM).AsValueString()
